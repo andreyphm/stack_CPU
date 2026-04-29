@@ -3,39 +3,64 @@
 
 #include <stdio.h>
 
-#include "../headers/stack.h"
+#include "errors.h"
 
 const int CORRECT_NUMBER_OF_FILES = 2;
+const int NUM_OF_REGISTERS = 5;
+const int SIZE_OF_MEMORY = 100;
 
-typedef enum
+enum commands
 {
-    NO_COMMAND = 0,
-    PUSH = 1,
-    POP  = 2,
-    ADD  = 3,
-    SUB  = 4,
-    MUL  = 5,
-    DIV  = 6,
-    OUT  = 7
-} commands;
+    HLT         =  0,
+    PUSH        =  1,
+    POP         =  2,
+    ADD         =  3,
+    SUB         =  4,
+    MUL         =  5,
+    DIV         =  6,
+    OUT         =  7,
+    POPR        =  8,
+    PUSHR       =  9,
+    PUSHM       = 10,
+    POPM        = 11,
+    JUMP        = 12,
+    JUMPB       = 13,
+    JUMPA       = 14,
+    JUMPBE      = 15,
+    JUMPAE      = 16,
+    JUMPE       = 17,
+    JUMPNE      = 18,
+    CALL        = 19,
+    RET         = 20,
+    NO_COMMAND  = 21
+};
 
-typedef enum
+
+enum register_data
 {
-    SPU_NO_ERROR = 0,
-    SPU_READING_ERROR = 1
-} SPU_error_code;
+    NO_REG,
+    RAX,
+    RBX,
+    RCX,
+    RDX
+};
 
-typedef struct
+struct SPU_data
 {
     char* bytecode_buffer;
     int buffer_capacity;
     int buffer_index;
-} SPU_data;
+    double* registers;
+    double* memory;
+};
+
+struct stack_data;
+
+error_code check_input(FILE** const input_file, int argc, const char* const argv[]);
+void bad_argc_message(const char* const* argv);
 
 char* read_bytecode_file_to_buffer(FILE* const bytecode_file, int* buffer_size);
-SPU_error_code bytecode_to_commands(SPU_data* SPU, stack_data* stack);
+error_code cond_jump_command(SPU_data* const SPU, stack_data* const stack, const commands command_code);
+error_code bytecode_to_commands(SPU_data* const SPU, stack_data* const stack);
 
-void parse_argc_argv(int argc, const char* argv[]);
-void check_bytecode_file(const FILE* const bytecode_file);
-
-#endif //SPU_H
+#endif // SPU_H
