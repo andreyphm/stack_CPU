@@ -1,64 +1,35 @@
 #ifndef STACK_H
 #define STACK_H
 
-#include <stdio.h>
+#include "errors.h"
 
 const double CANARY = (double)0xDEADBABEDEADBABE;
 const double POISON = (double)0xBEADFACEBEADFACE;
 const double NUMBER_CLOSE_TO_ZERO  = 10e-12;
 
-typedef struct
+struct stack_data
 {
     double* data;
     size_t size;
     size_t capacity;
-} stack_data;
+};
 
-typedef enum
-{
-    NO_ERROR = 0,
-    STACK_NULLPTR = 1,
-    DATA_NULLPTR = 2,
-    LEFT_CANARY_DIED = 4,
-    RIGHT_CANARY_DIED = 8,
-    OVERFLOWW = 16,
-    STACK_EMPTY = 32,
-    DIVISION_BY_ZERO = 64
-} stack_error_code;
-
-#define CHECK_ERROR(VALUE, ERROR_CODE, ERROR) ({                   \
-    if (VALUE)                                                     \
-    {                                                              \
-        ERROR |= ERROR_CODE;                                       \
-        fprintf(stderr, MAKE_BOLD_RED("Error code: %d\n"), ERROR); \
-        return ERROR;                                              \
-    } })
-
-#define CHECK_ERROR_FOR_POP(stack) ({                                           \
-    if (pointer_error)                                                          \
-    {                                                                           \
-        *pointer_error = stack_verify(stack);                                   \
-        if (*pointer_error)                                                     \
-        {                                                                       \
-            fprintf(stderr, MAKE_BOLD_RED("Error code: %d\n"), *pointer_error); \
-            return POISON;                                                      \
-        }                                                                       \
-    } })
-
-int stack_init(stack_data* const stack, size_t first_size_of_stack);
-int stack_push(stack_data* const stack, double value);
-double stack_pop(stack_data* const stack, int* pointer_error = NULL);
+void stack_init(stack_data* const stack, size_t capacity);
+error_code stack_push(stack_data* const stack, double value);
+double stack_pop(stack_data* const stack, error_code* error = nullptr);
 void stack_dump(const stack_data* const stack);
 void stack_destroy(stack_data* stack);
-int stack_verify(const stack_data* const stack);
+error_code stack_verify(const stack_data* const stack);
 
-int stack_add(stack_data* const stack);
-int stack_sub(stack_data* const stack);
-int stack_mul(stack_data* const stack);
-int stack_div(stack_data* const stack);
-int stack_out(stack_data* const stack);
+error_code stack_add(stack_data* const stack);
+error_code stack_sub(stack_data* const stack);
+error_code stack_mul(stack_data* const stack);
+error_code stack_div(stack_data* const stack);
+error_code stack_out(stack_data* const stack);
 
-void string_to_command(const char* asm_code_string, stack_data* stack);
-int is_close_to_zero (double number_being_checked);
+double stack_popr(stack_data* const stack, const int register_code, double* const registers, error_code* error);
+double stack_popm(stack_data* const stack, const int memory_index, double* const memory, error_code* error);
+
+bool is_close_to_zero (double number_being_checked);
 
 #endif // STACK_H
